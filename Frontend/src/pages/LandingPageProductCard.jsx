@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import API from "../api/axios";
 import ProductCard from "../components/ProductCard";
 import { SkeletonGrid } from "../components/SkeletonLoader";
 
@@ -10,9 +10,7 @@ function LandingPageProductCard({ selectedCategory, limit }) {
   async function GetAllData() {
     try {
       setLoading(true);
-      const DataResponse = await axios.get(
-        "http://localhost:5000/api/product/allProducts"
-      );
+      const DataResponse = await API.get("/product/allProducts");
 
       setProducts(DataResponse.data?.allProducts?.products || DataResponse.data?.products || []);
     } catch (error) {

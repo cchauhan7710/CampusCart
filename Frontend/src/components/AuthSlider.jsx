@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import API from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -70,7 +70,7 @@ const AuthSlider = () => {
 
     try {
       setForgotLoading(true);
-      const res = await axios.post("http://localhost:5000/api/auth/forget-password", {
+      const res = await API.post("/auth/forget-password", {
         email: forgotEmail,
       });
       toast.success(res.data?.message || "OTP sent successfully to your email!");
@@ -102,7 +102,7 @@ const AuthSlider = () => {
 
     try {
       setForgotLoading(true);
-      const res = await axios.post("http://localhost:5000/api/auth/change-password", {
+      const res = await API.post("/auth/change-password", {
         email: forgotEmail,
         otp: forgotOtp,
         password: forgotNewPassword,
@@ -129,14 +129,10 @@ const AuthSlider = () => {
 
     try {
       setLoginLoading(true);
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        {
-          email: loginEmail,
-          password: loginPassword,
-        },
-        { withCredentials: true }
-      );
+      const response = await API.post("/auth/login", {
+        email: loginEmail,
+        password: loginPassword,
+      });
       if (response.data) {
         const token = response.data.accessToken;
         const user = response.data.user;
@@ -168,18 +164,15 @@ const AuthSlider = () => {
 
     try {
       setRegLoading(true);
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        {
-          userName: regUsername,
-          email: regEmail,
-          password: regPassword,
-          collageName: regCollege,
-          department: regDept,
-          semester: regSemester,
-          phone: regPhone,
-        }
-      );
+      const response = await API.post("/auth/register", {
+        userName: regUsername,
+        email: regEmail,
+        password: regPassword,
+        collageName: regCollege,
+        department: regDept,
+        semester: regSemester,
+        phone: regPhone,
+      });
       if (response.data) {
         toast.success("Account created! Please verify your OTP.");
         navigate("/otp", {

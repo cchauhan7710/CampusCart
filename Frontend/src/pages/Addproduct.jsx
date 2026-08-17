@@ -14,7 +14,7 @@ import {
   Info
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api/axios';
 import ProductCard from '../components/ProductCard';
 
 const Addproduct = () => {
@@ -237,16 +237,7 @@ const Addproduct = () => {
         submitData.append("images", JSON.stringify(urlImages));
       }
 
-      const token = localStorage.getItem("token");
-
-      const response = await axios.post(
-        "http://localhost:5000/api/product/create-product",
-        submitData,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          withCredentials: true,
-        }
-      );
+      const response = await API.post("/product/create-product", submitData);
 
       if (response.data) {
         setIsSubmitting(false);

@@ -1,23 +1,16 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import API from '../api/axios';
 import toast from 'react-hot-toast';
 import { useAuth } from './AuthContext';
 
 const CartWishlistContext = createContext(null);
 
-const API_BASE_URL = 'http://localhost:5000/api';
-
 export const CartWishlistProvider = ({ children }) => {
-    const { token, isAuthenticated } = useAuth();
+    const { isAuthenticated } = useAuth();
     const [cart, setCart] = useState({ items: [] });
     const [wishlist, setWishlist] = useState({ products: [] });
     const [loadingCart, setLoadingCart] = useState(false);
     const [loadingWishlist, setLoadingWishlist] = useState(false);
-
-    const getAuthHeaders = useCallback(() => {
-        const authToken = token || localStorage.getItem('token');
-        return authToken ? { Authorization: `Bearer ${authToken}` } : {};
-    }, [token]);
 
     // Fetch user cart from API
     const fetchCart = useCallback(async () => {
@@ -27,10 +20,7 @@ export const CartWishlistProvider = ({ children }) => {
         }
         try {
             setLoadingCart(true);
-            const res = await axios.get(`${API_BASE_URL}/cart`, {
-                headers: getAuthHeaders(),
-                withCredentials: true,
-            });
+            const res = await API.get('/cart');
             if (res.data?.cart) {
                 setCart(res.data.cart);
             }
@@ -39,7 +29,7 @@ export const CartWishlistProvider = ({ children }) => {
         } finally {
             setLoadingCart(false);
         }
-    }, [isAuthenticated, getAuthHeaders]);
+    }, [isAuthenticated]);
 
     // Fetch user wishlist from API
     const fetchWishlist = useCallback(async () => {
@@ -49,10 +39,7 @@ export const CartWishlistProvider = ({ children }) => {
         }
         try {
             setLoadingWishlist(true);
-            const res = await axios.get(`${API_BASE_URL}/wishlist`, {
-                headers: getAuthHeaders(),
-                withCredentials: true,
-            });
+            const res = await API.get('/wishlist');
             if (res.data?.wishlist) {
                 setWishlist(res.data.wishlist);
             }
@@ -61,7 +48,7 @@ export const CartWishlistProvider = ({ children }) => {
         } finally {
             setLoadingWishlist(false);
         }
-    }, [isAuthenticated, getAuthHeaders]);
+    }, [isAuthenticated]);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -83,14 +70,7 @@ export const CartWishlistProvider = ({ children }) => {
         if (!productId) return false;
 
         try {
-            const res = await axios.post(
-                `${API_BASE_URL}/cart/add`,
-                { productId, quantity },
-                {
-                    headers: getAuthHeaders(),
-                    withCredentials: true,
-                }
-            );
+            const res = await API.post('/cart/add', { productId, quantity });
             if (res.data?.cart) {
                 setCart(res.data.cart);
                 toast.success(`Added "${product.title || 'Item'}" to Cart`);
@@ -108,14 +88,7 @@ export const CartWishlistProvider = ({ children }) => {
     const updateCartQty = async (productId, quantity) => {
         if (!isAuthenticated) return;
         try {
-            const res = await axios.put(
-                `${API_BASE_URL}/cart/update`,
-                { productId, quantity },
-                {
-                    headers: getAuthHeaders(),
-                    withCredentials: true,
-                }
-            );
+            const res = await API.put('/cart/update', { productId, quantity });
             if (res.data?.cart) {
                 setCart(res.data.cart);
                 if (quantity <= 0) {
@@ -132,10 +105,7 @@ export const CartWishlistProvider = ({ children }) => {
     const removeFromCart = async (productId) => {
         if (!isAuthenticated) return;
         try {
-            const res = await axios.delete(`${API_BASE_URL}/cart/remove/${productId}`, {
-                headers: getAuthHeaders(),
-                withCredentials: true,
-            });
+            const res = await API.delete(`/cart/remove/${productId}`);
             if (res.data?.cart) {
                 setCart(res.data.cart);
                 toast.success('Item removed from cart');
@@ -150,10 +120,7 @@ export const CartWishlistProvider = ({ children }) => {
     const clearCart = async () => {
         if (!isAuthenticated) return;
         try {
-            const res = await axios.delete(`${API_BASE_URL}/cart/clear`, {
-                headers: getAuthHeaders(),
-                withCredentials: true,
-            });
+            const res = await API.delete('/cart/clear');
             if (res.data?.cart) {
                 setCart(res.data.cart);
                 toast.success('Cart cleared');
@@ -174,14 +141,7 @@ export const CartWishlistProvider = ({ children }) => {
         if (!productId) return false;
 
         try {
-            const res = await axios.post(
-                `${API_BASE_URL}/wishlist/toggle`,
-                { productId },
-                {
-                    headers: getAuthHeaders(),
-                    withCredentials: true,
-                }
-            );
+            const res = await API.post('/wishlist/toggle', { productId });
             if (res.data?.wishlist) {
                 setWishlist(res.data.wishlist);
                 if (res.data.isWishlisted) {
@@ -202,10 +162,7 @@ export const CartWishlistProvider = ({ children }) => {
     const removeFromWishlist = async (productId) => {
         if (!isAuthenticated) return;
         try {
-            const res = await axios.delete(`${API_BASE_URL}/wishlist/remove/${productId}`, {
-                headers: getAuthHeaders(),
-                withCredentials: true,
-            });
+            const res = await API.delete(`/wishlist/remove/${productId}`);
             if (res.data?.wishlist) {
                 setWishlist(res.data.wishlist);
                 toast.success('Removed from Wishlist');

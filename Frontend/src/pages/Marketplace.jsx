@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api/axios';
 import { 
   Search, 
   Sparkles, 
@@ -33,7 +33,7 @@ const Marketplace = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get("http://localhost:5000/api/product/allProducts");
+      const response = await API.get("/product/allProducts");
       
       if (response.data?.allProducts?.products) {
         setProducts(response.data.allProducts.products);

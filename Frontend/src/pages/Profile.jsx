@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
 import toast from 'react-hot-toast';
@@ -78,7 +78,7 @@ const Profile = () => {
   const fetchUserProducts = async () => {
     try {
       setLoadingListings(true);
-      const response = await axios.get("http://localhost:5000/api/product/allProducts");
+      const response = await API.get("/product/allProducts");
       
       let all = [];
       if (response.data?.allProducts?.products) {
@@ -166,16 +166,7 @@ const Profile = () => {
       setSavingProfile(true);
       const updatedFields = { ...editData, avatar: avatarToSave };
       
-      const res = await axios.put(
-        "http://localhost:5000/api/auth/update-profile",
-        updatedFields,
-        {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-          withCredentials: true,
-        }
-      );
+      const res = await API.put("/auth/update-profile", updatedFields);
 
       const updatedUser = res.data?.user || { ...user, avatar: avatarToSave };
       login(token, updatedUser);
@@ -196,7 +187,7 @@ const Profile = () => {
   // Handle Mark as Sold / Active
   const handleToggleSold = async (productId, currentSoldState) => {
     try {
-      await axios.patch(`http://localhost:5000/api/product/update-sold/${productId}`, {
+      await API.patch(`/product/update-sold/${productId}`, {
         isSold: !currentSoldState
       });
       toast.success(currentSoldState ? "Listing marked as Available" : "Listing marked as Sold!");
@@ -219,16 +210,7 @@ const Profile = () => {
     setSavingProfile(true);
 
     try {
-      const res = await axios.put(
-        "http://localhost:5000/api/auth/update-profile",
-        editData,
-        {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-          withCredentials: true,
-        }
-      );
+      const res = await API.put("/auth/update-profile", editData);
 
       const updatedUser = res.data?.user || { ...user, ...editData };
       login(token, updatedUser);
@@ -260,19 +242,10 @@ const Profile = () => {
 
     try {
       setChangingPassword(true);
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/update-password",
-        {
-          currentPassword: passData.current,
-          newPassword: passData.newPass,
-        },
-        {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-          withCredentials: true,
-        }
-      );
+      const res = await API.post("/auth/update-password", {
+        currentPassword: passData.current,
+        newPassword: passData.newPass,
+      });
       toast.success(res.data?.message || "Password updated successfully!");
       setPassData({ current: '', newPass: '', confirm: '' });
     } catch (error) {

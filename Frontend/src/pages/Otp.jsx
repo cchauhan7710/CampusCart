@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api/axios";
 import toast from "react-hot-toast";
 
 const OtpPage = () => {
@@ -95,14 +95,11 @@ const OtpPage = () => {
 
       if (isResetPassword) {
         // Password Reset verification
-        const response = await axios.post(
-          "http://localhost:5000/api/auth/change-password",
-          {
-            email,
-            otp: fullOtp,
-            password: newPassword,
-          }
-        );
+        const response = await API.post("/auth/change-password", {
+          email,
+          otp: fullOtp,
+          password: newPassword,
+        });
 
         if (response.data) {
           toast.success(response.data?.message || "Password Changed Successfully!");
@@ -110,13 +107,10 @@ const OtpPage = () => {
         }
       } else {
         // Email OTP verification
-        const response = await axios.post(
-          "http://localhost:5000/api/auth/verify-email",
-          {
-            email,
-            otp: fullOtp,
-          }
-        );
+        const response = await API.post("/auth/verify-email", {
+          email,
+          otp: fullOtp,
+        });
 
         if (response.data) {
           toast.success("OTP Verified Successfully!");
@@ -133,7 +127,7 @@ const OtpPage = () => {
   const handleResend = async () => {
     if (resendTimer === 0) {
       try {
-        await axios.post("http://localhost:5000/api/auth/forget-password", { email });
+        await API.post("/auth/forget-password", { email });
         toast.success("Verification code has been resent to your email.");
         setResendTimer(30);
       } catch (err) {
