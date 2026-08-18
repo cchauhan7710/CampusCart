@@ -1,0 +1,26 @@
+{
+  "name": "campuscart-root",
+  "version": "1.0.0",
+  "description": "CampusCart - Full-stack Peer-to-Peer College Marketplace",
+  "private": true,
+  "main": "Backend/server.js",
+  "scripts": {
+    "start": "node Backend/server.js",
+    "dev:backend": "npm run dev --prefix Backend",
+    "dev:frontend": "npm run dev --prefix Frontend",
+    "build": "npm run build --prefix Frontend",
+    "build:frontend": "npm run build --prefix Frontend",
+    "install:all": "npm install --prefix Backend && npm install --prefix Frontend"
+  },
+  "keywords": [
+    "campuscart",
+    "marketplace",
+    "college",
+    "fullstack",
+    "react",
+    "express",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "ISC"
+}
