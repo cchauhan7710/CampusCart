@@ -138,8 +138,8 @@ const Marketplace = () => {
         {/* Header Hero Banner */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-white/5">
           <div>
-            <div className="inline-flex items-center gap-1.5 bg-[#D5354F]/10 border border-[#D5354F]/20 text-[#D5354F] px-3.5 py-1 rounded-full text-xs font-semibold tracking-wide uppercase mb-3">
-              <Sparkles size={11} className="animate-pulse" /> Live Student Marketplace
+            <div className="inline-flex items-center bg-[#D5354F]/10 border border-[#D5354F]/20 text-[#D5354F] px-3.5 py-1 rounded-full text-xs font-semibold tracking-wide uppercase mb-3">
+              Live Student Marketplace
             </div>
             <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-tight">
               Campus <span className="text-[#D5354F]">Marketplace</span>
@@ -311,7 +311,7 @@ const Marketplace = () => {
           </div>
         ) : (
           /* Main Product Grid */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 justify-items-center">
             {filteredAndSortedProducts.map((product) => (
               <ProductCard key={product._id || product.id} product={product} />
             ))}

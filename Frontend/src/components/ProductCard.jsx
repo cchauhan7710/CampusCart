@@ -192,11 +192,11 @@ function ProductCard({ product, listing, variant = "luxury" }) {
   return (
     <div 
       onClick={handleCardClick}
-      className="w-full max-w-[340px] sm:max-w-[350px] group relative rounded-[32px] overflow-hidden bg-[#0e1015]/90 border border-white/10 shadow-[0_20px_45px_rgba(0,0,0,0.5)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.75)] hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between select-none cursor-pointer"
+      className="w-full max-w-[340px] xs:max-w-[360px] sm:max-w-none group relative rounded-[28px] sm:rounded-[32px] overflow-hidden bg-[#0e1015]/90 border border-white/10 shadow-[0_20px_45px_rgba(0,0,0,0.5)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.75)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between select-none cursor-pointer"
     >
       
       {/* Top Image Container with Dark Gradient Blur Fade */}
-      <div className="relative w-full h-[230px] overflow-hidden bg-[#161820]">
+      <div className="relative w-full h-[200px] xs:h-[220px] sm:h-[230px] overflow-hidden bg-[#161820]">
         {images[currentImgIndex] ? (
           <img
             src={images[currentImgIndex]}
@@ -305,23 +305,13 @@ function ProductCard({ product, listing, variant = "luxury" }) {
             <button
               type="button"
               onClick={handleAddToCartClick}
-              className={`flex-1 font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-full text-center transition-all duration-200 shadow-[0_10px_25px_rgba(255,255,255,0.12)] flex items-center justify-center gap-2 cursor-pointer ${
+              className={`flex-1 font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-full text-center transition-all duration-200 cursor-pointer ${
                 inCart
                   ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30'
-                  : 'bg-white hover:bg-gray-100 active:scale-[0.98] text-black'
+                  : 'bg-gradient-to-r from-[#D5354F] to-[#ff4569] hover:brightness-110 active:scale-[0.98] text-white shadow-[0_8px_20px_rgba(213,53,79,0.35)]'
               }`}
             >
-              {inCart ? (
-                <>
-                  <Check size={15} />
-                  <span>In Cart</span>
-                </>
-              ) : (
-                <>
-                  <span>Add to Cart</span>
-                  <ShoppingBag size={14} />
-                </>
-              )}
+              <span>{inCart ? 'In Cart' : 'Add to Cart'}</span>
             </button>
             <button
               type="button"

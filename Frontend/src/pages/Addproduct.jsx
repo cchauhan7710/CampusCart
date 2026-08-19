@@ -315,8 +315,8 @@ const Addproduct = () => {
 
         {/* Header Title */}
         <div className="relative">
-          <div className="inline-flex items-center gap-1.5 bg-[#D5354F]/10 border border-[#D5354F]/20 text-[#D5354F] px-3.5 py-1 rounded-full text-xs font-semibold tracking-wide uppercase mb-3">
-            <Sparkles size={11} className="animate-pulse" /> Re-commerce Hub
+          <div className="inline-flex items-center bg-[#D5354F]/10 border border-[#D5354F]/20 text-[#D5354F] px-3.5 py-1 rounded-full text-xs font-semibold tracking-wide uppercase mb-3">
+            Re-commerce Hub
           </div>
           <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-tight">
             List Your <span className="text-[#D5354F]">Campus Gear</span>
