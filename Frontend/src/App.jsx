@@ -28,6 +28,10 @@ function App() {
   const location = useLocation();
   const hideFooter = ["/login", "/register", "/otp"].includes(location.pathname);
 
+  // Preserve AuthSlider mounted instance during /login <-> /register toggling for smooth sliding CSS transitions
+  const isAuthRoute = ["/login", "/register"].includes(location.pathname);
+  const routeKey = isAuthRoute ? "/auth" : location.pathname;
+
   return (
     <ThemeProvider>
       <AuthProvider>
@@ -70,7 +74,7 @@ function App() {
 
             <Suspense fallback={<SkeletonPage />}>
               <AnimatePresence mode="wait">
-                <Routes location={location} key={location.pathname}>
+                <Routes location={location} key={routeKey}>
                   {/* Public Pages */}
                   <Route
                     path="/"
