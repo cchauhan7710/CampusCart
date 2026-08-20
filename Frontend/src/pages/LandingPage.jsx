@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 const LandingPage = () => {
   const [scrollProgress, setScrollProgress] = useState(0)
   const [hoveredCardId, setHoveredCardId] = useState(null)
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const scrollY = window.scrollY
-      const maxScroll = 500
-      const progress = Math.min(scrollY / maxScroll, 1)
-      setScrollProgress(progress)
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY
+          const maxScroll = 500
+          const progress = Math.min(scrollY / maxScroll, 1)
+          setScrollProgress(progress)
+          ticking = false
+        })
+        ticking = true
+      }
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -34,6 +41,7 @@ const LandingPage = () => {
       <style>{`
         .premium-transition {
           transition: transform 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.18s ease-out;
+          will-change: transform, opacity;
         }
       `}</style>
 
@@ -60,7 +68,7 @@ const LandingPage = () => {
               key={card.id} 
               className={`absolute flex flex-col items-center gap-2.5 pointer-events-auto premium-transition cursor-pointer ${card.className} ${isHovered ? 'brightness-110 z-30' : 'brightness-100 z-20'}`}
               style={{
-                transform: `translate(${tx}px, ${ty}px) rotate(${currentRotate}deg) scale(${scale})`,
+                transform: `translate3d(${tx}px, ${ty}px, 0) rotate(${currentRotate}deg) scale(${scale})`,
                 opacity
               }}
               onMouseEnter={() => setHoveredCardId(card.id)}
@@ -92,6 +100,8 @@ const LandingPage = () => {
                     <img 
                       src={card.image} 
                       alt={card.label} 
+                      loading="lazy"
+                      decoding="async"
                       className={`w-full h-full object-contain select-none pointer-events-none transition-all duration-300 relative z-10 ${
                         isHovered ? 'scale-110 drop-shadow-[0_12px_20px_rgba(0,0,0,0.55)]' : 'scale-100 drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)]'
                       }`} 
@@ -119,17 +129,17 @@ const LandingPage = () => {
           Unlimited tools to list, search, and trade campus essentials with peer students securely.
         </p>
 
-        <div className='flex gap-4 mt-8'>
+        <div className='flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8 w-full sm:w-auto px-4 sm:px-0 justify-center'>
           <Link 
             to='/marketplace' 
-            className='bg-[#D5354F] hover:bg-[#ff4569] text-white text-[15px] font-medium px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-md shadow-[#D5354F]/20 hover:shadow-[#ff4569]/30'
+            className='bg-[#D5354F] hover:bg-[#ff4569] text-white text-[15px] font-medium px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-[#D5354F]/20 hover:shadow-[#ff4569]/30 active:scale-95 text-center'
           >
             Explore Marketplace
             <ArrowRight size={16} />
           </Link>
           <Link 
             to='/addproduct' 
-            className='border border-white/10 hover:border-white/20 hover:bg-white/5 text-white text-[15px] font-medium px-6 py-3.5 rounded-xl transition-all duration-300 cursor-pointer'
+            className='border border-white/10 hover:border-white/20 hover:bg-white/5 text-white text-[15px] font-medium px-6 py-3.5 rounded-xl transition-all duration-300 cursor-pointer active:scale-95 text-center'
           >
             Sell an Item
           </Link>

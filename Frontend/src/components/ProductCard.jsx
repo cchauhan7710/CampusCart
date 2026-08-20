@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { FiHeart } from "react-icons/fi";
 import { ArrowRight, ShoppingBag, Check, GraduationCap, Info } from "lucide-react";
 import { useCartWishlist } from "../context/CartWishlistContext";
@@ -82,6 +82,8 @@ function ProductCard({ product, listing, variant = "luxury" }) {
                 <img
                   src={images[0]}
                   alt={p.title}
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover rounded-[14px] transition duration-[500ms] ease-out group-hover:scale-[1.05]"
                 />
               ) : (
@@ -201,6 +203,8 @@ function ProductCard({ product, listing, variant = "luxury" }) {
           <img
             src={images[currentImgIndex]}
             alt={p.title || "Product"}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           />
         ) : (
@@ -332,4 +336,4 @@ function ProductCard({ product, listing, variant = "luxury" }) {
   );
 }
 
-export default ProductCard;
+export default memo(ProductCard);

@@ -24,46 +24,50 @@ export async function register(req, res) {
       role,
     } = req.body;
 
+    if (!userName || !email || !password) {
+      return res.status(400).json({
+        message: "Username, email, and password are required",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    const cleanedEmail = email.toLowerCase().trim();
+    const cleanedUserName = userName.trim();
+
     const isUserAlreadyExist = await userModel.findOne({
-      $or: [{ email }, { userName }],
+      $or: [{ email: cleanedEmail }, { userName: cleanedUserName }],
     });
 
     if (isUserAlreadyExist) {
-      return res.status(401).json({
-        message: "User already exist please login to continue",
+      const isEmailMatch = isUserAlreadyExist.email === cleanedEmail;
+      return res.status(400).json({
+        message: isEmailMatch
+          ? "User with this email already exists. Please log in to continue."
+          : "Username is already taken. Please choose another username.",
       });
     }
 
     const hash = await bcrypt.hash(password, 10);
 
     const user = await userModel.create({
-      userName,
-      email,
+      userName: cleanedUserName,
+      email: cleanedEmail,
       password: hash,
-      collageName,
+      collageName: collageName ? collageName.trim() : "",
       department,
       semester,
-      phone,
-      avatar,
-      role,
+      phone: phone ? phone.trim() : "",
+      avatar: avatar || "",
+      role: role || "user",
     });
 
-    // const otp = generateOTP()
-    // const html = otpHTML(otp)
+    await sendOTP(cleanedEmail);
 
-    // const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
-
-    // if (!otpHash) return res.status(404).json({ message: "OTP not found" });
-
-    // await otpModel.create({
-    //     email,
-    //     user: user._id,
-    //     otpHash
-    // })
-
-    // await sendMail(email, "OTP Verification", `Your OTP is:${otp}`, html)
-
-    await sendOTP(email);
     return res.status(201).json({
       message: "User created successfully",
       user: {
@@ -82,9 +86,14 @@ export async function register(req, res) {
       },
     });
   } catch (error) {
-    console.error(error.message, "error while creating user", error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: "User already exists with provided email or username",
+      });
+    }
+    console.error("Error while creating user:", error.message, error);
     return res.status(500).json({
-      message: "internal server error",
+      message: "Internal server error",
     });
   }
 }
@@ -93,7 +102,8 @@ export async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    const user = await userModel.findOne({ email });
+    const cleanedEmail = email ? email.toLowerCase().trim() : "";
+    const user = await userModel.findOne({ email: cleanedEmail });
 
     if (!user)
       return res

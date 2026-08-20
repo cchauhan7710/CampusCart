@@ -85,7 +85,7 @@ const Navbar = () => {
           : 'bg-[#f8f7f4]/85 border-black/10 text-stone-900 shadow-sm'
       }`}
     >
-      <div className="w-full h-[64px] sm:h-[72px] flex justify-between items-center px-4 sm:px-6 md:px-8 lg:px-10"> 
+      <div className="w-full h-[64px] sm:h-[72px] flex justify-between items-center px-3 sm:px-6 md:px-8 lg:px-10"> 
         
         {/* Left Section: Brand Logo & Search Bar */}
         <div className="flex items-center gap-3 sm:gap-4 md:gap-5 flex-shrink-0">

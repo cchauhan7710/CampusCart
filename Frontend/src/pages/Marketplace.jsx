@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
 import { 
   Search, 
-  Sparkles, 
   Plus, 
   ArrowUpDown, 
   ChevronRight, 
@@ -26,10 +25,12 @@ const Marketplace = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState('newest');
 
-  const categories = ["All", "Book", "Electronics", "Lab Equipment", "Notes", "Stationery", "Other"];
+  const categories = useMemo(() => [
+    "All", "Book", "Electronics", "Lab Equipment", "Notes", "Stationery", "Other"
+  ], []);
 
   // Fetch all products from API
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -50,54 +51,62 @@ const Marketplace = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
-  // Category counts calculation
-  const getCategoryCount = (cat) => {
-    if (cat === 'All') return products.length;
-    return products.filter(p => p.category === cat).length;
-  };
-
-  // Filter & Sort Logic
-  const filteredAndSortedProducts = products
-    .filter((product) => {
-      // Category match
-      const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-
-      // Search match (title, description, category)
-      const term = searchTerm.toLowerCase().trim();
-      const matchesSearch = !term || 
-        product.title?.toLowerCase().includes(term) ||
-        product.description?.toLowerCase().includes(term) ||
-        product.category?.toLowerCase().includes(term);
-
-      return matchesCategory && matchesSearch;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'price-low') {
-        return (a.price || 0) - (b.price || 0);
+  // Category counts calculation (memoized)
+  const categoryCounts = useMemo(() => {
+    const counts = { All: products.length };
+    products.forEach((p) => {
+      if (p.category) {
+        counts[p.category] = (counts[p.category] || 0) + 1;
       }
-      if (sortBy === 'price-high') {
-        return (b.price || 0) - (a.price || 0);
-      }
-      if (sortBy === 'title-az') {
-        return (a.title || '').localeCompare(b.title || '');
-      }
-      // Default: newest first
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return dateB - dateA;
     });
+    return counts;
+  }, [products]);
 
-  const clearFilters = () => {
+  // Filter & Sort Logic (memoized for fast rendering)
+  const filteredAndSortedProducts = useMemo(() => {
+    const term = searchTerm.toLowerCase().trim();
+
+    return products
+      .filter((product) => {
+        // Category match
+        const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
+
+        // Search match (title, description, category)
+        const matchesSearch = !term || 
+          product.title?.toLowerCase().includes(term) ||
+          product.description?.toLowerCase().includes(term) ||
+          product.category?.toLowerCase().includes(term);
+
+        return matchesCategory && matchesSearch;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'price-low') {
+          return (a.price || 0) - (b.price || 0);
+        }
+        if (sortBy === 'price-high') {
+          return (b.price || 0) - (a.price || 0);
+        }
+        if (sortBy === 'title-az') {
+          return (a.title || '').localeCompare(b.title || '');
+        }
+        // Default: newest first
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
+  }, [products, selectedCategory, searchTerm, sortBy]);
+
+  const clearFilters = useCallback(() => {
     setSearchTerm('');
     setSelectedCategory('All');
     setSortBy('newest');
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white relative py-10 px-4 md:px-8 lg:px-12 xl:px-20 select-none">
@@ -152,14 +161,14 @@ const Marketplace = () => {
           <div className="flex items-center gap-3">
             <Link
               to="/addproduct"
-              className="bg-[#D5354F] hover:bg-[#ff4569] text-white text-xs md:text-sm font-bold px-5 py-3.5 rounded-xl transition-all duration-300 flex items-center gap-2 glow-button whitespace-nowrap"
+              className="bg-[#D5354F] hover:bg-[#ff4569] text-white text-xs md:text-sm font-bold px-5 py-3.5 rounded-xl transition-all duration-300 flex items-center gap-2 glow-button whitespace-nowrap active:scale-95"
             >
               <Plus size={16} />
               List Your Gear
             </Link>
             <button
               onClick={fetchProducts}
-              className="p-3.5 bg-[#141414] hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white rounded-xl transition-all duration-200 cursor-pointer"
+              className="p-3.5 bg-[#141414] hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white rounded-xl transition-all duration-200 cursor-pointer active:scale-95"
               title="Refresh Listings"
             >
               <RefreshCw size={16} className={loading ? "animate-spin text-[#ff4569]" : ""} />
@@ -223,7 +232,7 @@ const Marketplace = () => {
             </span>
             {categories.map((cat) => {
               const isActive = selectedCategory === cat;
-              const count = getCategoryCount(cat);
+              const count = categoryCounts[cat] || 0;
 
               return (
                 <button
