@@ -31,8 +31,10 @@ export const sendMail = async  ( to , subject , msg , html )=>{
          html:html
      })
      console.log(`Message sent ${info.messageId}`)
+     return info;
    } catch (error) {
-    console.log("error while sending OTP",error.message,error)
+    console.log("error while sending OTP",error.message,error);
+    throw error;
    }
 
 }

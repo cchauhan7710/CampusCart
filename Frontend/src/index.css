@@ -192,12 +192,12 @@ html, body {
   border-color: rgba(0, 0, 0, 0.09) !important;
 }
 
-/* Input elements in Light Mode */
+/* Input elements, Auth & OTP Light Mode Overrides */
 .light-theme input,
 .light-theme select,
 .light-theme textarea,
 .light-theme .auth-form {
-  background-color: #fdfbf7 !important;
+  background-color: #ffffff !important;
   color: #1c1917 !important;
   border-color: rgba(0, 0, 0, 0.12) !important;
 }
@@ -209,6 +209,87 @@ html, body {
 .light-theme input::placeholder,
 .light-theme textarea::placeholder {
   color: #878079 !important;
+  opacity: 1 !important;
+}
+
+/* Auth Card & Container in Light Mode */
+.light-theme .auth-card {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06), 0 0 30px rgba(255, 69, 105, 0.05) !important;
+}
+
+/* Auth Input Fields in Light Mode */
+.light-theme .auth-input {
+  background-color: #f4f2ed !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  color: #1c1917 !important;
+}
+
+.light-theme .auth-input::placeholder {
+  color: #878079 !important;
+  opacity: 1 !important;
+}
+
+.light-theme .auth-input:focus {
+  background-color: #ffffff !important;
+  border-color: #ff4569 !important;
+  box-shadow: 0 0 0 3px rgba(255, 69, 105, 0.18) !important;
+}
+
+.light-theme select.auth-input {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(0,0,0,0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+  color: #1c1917 !important;
+}
+
+.light-theme select.auth-input option {
+  background-color: #ffffff !important;
+  color: #1c1917 !important;
+}
+
+.light-theme .auth-input:-webkit-autofill,
+.light-theme .auth-input:-webkit-autofill:hover, 
+.light-theme .auth-input:-webkit-autofill:focus, 
+.light-theme .auth-input:-webkit-autofill:active {
+  -webkit-text-fill-color: #1c1917 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #f4f2ed inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* OTP Page Light Mode Overrides */
+.light-theme .otp-card {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06), 0 0 30px rgba(255, 69, 105, 0.05) !important;
+  color: #1c1917 !important;
+}
+
+.light-theme .otp-input {
+  background-color: #f4f2ed !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  color: #1c1917 !important;
+}
+
+.light-theme .otp-input:focus {
+  background-color: #ffffff !important;
+  border-color: #ff4569 !important;
+  box-shadow: 0 0 0 3px rgba(255, 69, 105, 0.2) !important;
+}
+
+.light-theme .otp-input:-webkit-autofill,
+.light-theme .otp-input:-webkit-autofill:hover,
+.light-theme .otp-input:-webkit-autofill:focus,
+.light-theme .otp-input:-webkit-autofill:active {
+  -webkit-text-fill-color: #1c1917 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #f4f2ed inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* OTP Page background gradients in Light Mode */
+.light-theme .via-\[\#0d0709\],
+.light-theme .to-\[\#170508\] {
+  --tw-gradient-to: #f5f4f0 !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #f5f4f0, var(--tw-gradient-to) !important;
 }
 
 /* Light Mode Soft Box Shadows - Removes dark black smudges/shadows around cards */

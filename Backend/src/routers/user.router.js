@@ -5,6 +5,7 @@ import {
   logout,
   genrateRefreshToken,
   verifyEmail,
+  verifyOTP,
   forgetPassword,
   changePassword,
   updatePassword,
@@ -20,6 +21,7 @@ router.post("/login", login);
 router.post("/rotate-token", genrateRefreshToken);
 router.post("/logout", logout);
 router.post("/verify-email", verifyEmail);
+router.post("/verify-otp", verifyOTP);
 router.post("/forget-password", forgetPassword);
 router.post("/change-password", changePassword);
 router.post("/update-password", authUser, updatePassword);

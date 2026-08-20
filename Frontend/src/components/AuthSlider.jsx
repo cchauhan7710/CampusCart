@@ -249,7 +249,7 @@ const AuthSlider = () => {
                 <select
                   value={regDept}
                   onChange={(e) => setRegDept(e.target.value)}
-                  className="auth-input bg-[#111] text-gray-300 !my-0"
+                  className="auth-input !my-0"
                 >
                   <option value="" disabled>Department</option>
                   <option value="CSE">CSE</option>
@@ -268,7 +268,7 @@ const AuthSlider = () => {
                 <select
                   value={regSemester}
                   onChange={(e) => setRegSemester(e.target.value)}
-                  className="auth-input bg-[#111] text-gray-300 !my-0"
+                  className="auth-input !my-0"
                 >
                   <option value="" disabled>Semester</option>
                   <option value="1">Sem 1</option>

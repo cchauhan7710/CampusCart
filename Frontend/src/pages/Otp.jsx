@@ -142,7 +142,7 @@ const OtpPage = () => {
       <div className="absolute top-[20%] left-[30%] w-[300px] h-[300px] bg-[#ff4569]/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-[20%] right-[30%] w-[300px] h-[300px] bg-[#7c3aed]/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="relative border border-white/5 bg-[#111111]/85 backdrop-blur-xl p-8 md:p-10 w-full max-w-[420px] text-white shadow-[0_20px_50px_rgba(0,0,0,0.7)] rounded-[28px] z-10 text-center">
+      <div className="otp-card relative border border-white/5 bg-[#111111]/85 backdrop-blur-xl p-8 md:p-10 w-full max-w-[420px] text-white shadow-[0_20px_50px_rgba(0,0,0,0.7)] rounded-[28px] z-10 text-center">
         <h2 className="text-3xl font-black tracking-tight text-white mb-2">
           {isResetPassword ? "Reset Password" : "Verify OTP"}
         </h2>
@@ -173,7 +173,7 @@ const OtpPage = () => {
                 ref={(el) => (inputRefs.current[index] = el)}
                 onChange={(e) => handleOtpChange(e.target.value, index)}
                 onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                className="w-11 h-11 md:w-13 md:h-13 rounded-xl border border-white/10 bg-[#161616]/50 text-white text-center text-xl font-extrabold focus:outline-none focus:border-[#ff4569] focus:ring-1 focus:ring-[#ff4569]/30 focus:bg-[#1c1c1c]/50 transition duration-300"
+                className="otp-input w-11 h-11 md:w-13 md:h-13 rounded-xl border border-white/10 bg-[#161616]/50 text-white text-center text-xl font-extrabold focus:outline-none focus:border-[#ff4569] focus:ring-1 focus:ring-[#ff4569]/30 transition duration-300"
               />
             ))}
           </div>
@@ -188,7 +188,7 @@ const OtpPage = () => {
                   placeholder="Enter new password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-[#161616] border border-white/10 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-[#ff4569]"
+                  className="auth-input !my-0"
                   required
                 />
               </div>
@@ -200,7 +200,7 @@ const OtpPage = () => {
                   placeholder="Confirm new password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-[#161616] border border-white/10 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-[#ff4569]"
+                  className="auth-input !my-0"
                   required
                 />
               </div>

@@ -9,6 +9,7 @@ import { generateOTP, otpHTML } from "../utils/otp.utils.js";
 import otpModel from "../models/otp.model.js";
 import { sendMail } from "../utils/sendMail.utils.js";
 import { sendOTP } from "../services/otp.service.js";
+import PendingUser from "../models/pendingUser.model.js";
 
 export async function register(req, res) {
   try {
@@ -39,22 +40,43 @@ export async function register(req, res) {
     const cleanedEmail = email.toLowerCase().trim();
     const cleanedUserName = userName.trim();
 
-    const isUserAlreadyExist = await userModel.findOne({
-      $or: [{ email: cleanedEmail }, { userName: cleanedUserName }],
+    // Check if user already exists in main collection
+    const existingUser = await userModel.findOne({
+      $or: [
+        { email: cleanedEmail },
+        { userName: cleanedUserName },
+      ],
     });
 
-    if (isUserAlreadyExist) {
-      const isEmailMatch = isUserAlreadyExist.email === cleanedEmail;
+    if (existingUser) {
+      const isEmailMatch = existingUser.email === cleanedEmail;
+
       return res.status(400).json({
         message: isEmailMatch
-          ? "User with this email already exists. Please log in to continue."
+          ? "User with this email already exists. Please log in."
           : "Username is already taken. Please choose another username.",
       });
     }
 
+    // Hash password
     const hash = await bcrypt.hash(password, 10);
 
-    const user = await userModel.create({
+    // Generate 6-digit numeric OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // OTP valid for 5 minutes
+    const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    // Remove any previous pending signups for the same email or username
+    await PendingUser.deleteMany({
+      $or: [
+        { email: cleanedEmail },
+        { userName: cleanedUserName },
+      ],
+    });
+
+    // Save pending user
+    const pendingUser = await PendingUser.create({
       userName: cleanedUserName,
       email: cleanedEmail,
       password: hash,
@@ -64,26 +86,27 @@ export async function register(req, res) {
       phone: phone ? phone.trim() : "",
       avatar: avatar || "",
       role: role || "user",
+      otp,
+      otpExpiresAt,
     });
 
-    await sendOTP(cleanedEmail);
+    try {
+      // Send OTP
+      await sendOTP(cleanedEmail, otp);
+    } catch (emailError) {
+      // If email fails, remove pending signup
+      await PendingUser.findByIdAndDelete(pendingUser._id);
 
-    return res.status(201).json({
-      message: "User created successfully",
-      user: {
-        _id: user._id,
-        id: user._id,
-        userName: user.userName,
-        username: user.userName,
-        email: user.email,
-        collageName: user.collageName,
-        department: user.department,
-        semester: user.semester,
-        phone: user.phone,
-        avatar: user.avatar,
-        role: user.role,
-        isVerified: user.isVerified,
-      },
+      console.error("OTP sending failed:", emailError);
+
+      return res.status(500).json({
+        message: "Unable to send OTP. Please try again.",
+      });
+    }
+
+    return res.status(200).json({
+      message: "OTP sent successfully. Please verify your email.",
+      email: cleanedEmail,
     });
   } catch (error) {
     if (error.code === 11000) {
@@ -91,7 +114,9 @@ export async function register(req, res) {
         message: "User already exists with provided email or username",
       });
     }
-    console.error("Error while creating user:", error.message, error);
+
+    console.error("Register error:", error);
+
     return res.status(500).json({
       message: "Internal server error",
     });
@@ -308,15 +333,29 @@ export async function forgetPassword(req, res) {
     const cleanedEmail = email.toLowerCase().trim();
     const user = await userModel.findOne({ email: cleanedEmail });
 
-    if (!user) {
-      return res.status(404).json({ message: "No user found with this email" });
+    if (user) {
+      // User exists -> send reset password OTP
+      await sendOTP(cleanedEmail);
+      return res.status(200).json({
+        message: "OTP sent successfully to your email",
+      });
     }
 
-    await sendOTP(cleanedEmail);
+    // Check if user is in PendingUser registration
+    const pendingUser = await PendingUser.findOne({ email: cleanedEmail });
+    if (pendingUser) {
+      const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      pendingUser.otp = newOtp;
+      pendingUser.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+      await pendingUser.save();
 
-    return res.status(200).json({
-      message: "OTP sent successfully to your email",
-    });
+      await sendOTP(cleanedEmail, newOtp);
+      return res.status(200).json({
+        message: "Resent verification code to your email",
+      });
+    }
+
+    return res.status(404).json({ message: "No user found with this email" });
   } catch (error) {
     console.error("Error in forgetPassword:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -332,7 +371,8 @@ export async function changePassword(req, res) {
     }
 
     const cleanedEmail = email.toLowerCase().trim();
-    const otpHash = crypto.createHash("sha256").update(otp.trim()).digest("hex");
+    const cleanOtp = otp.toString().trim();
+    const otpHash = crypto.createHash("sha256").update(cleanOtp).digest("hex");
 
     const otpDetail = await otpModel.findOne({ email: cleanedEmail, otpHash });
     if (!otpDetail) return res.status(400).json({ message: "Invalid OTP or Email" });
@@ -411,16 +451,89 @@ export async function verifyEmail(req, res) {
     }
 
     const cleanedEmail = email.toLowerCase().trim();
-    const otpHash = crypto.createHash("sha256").update(otp.trim()).digest("hex");
+    const cleanOtp = otp.toString().trim();
 
+    // 1. Check PendingUser signup session first
+    const pendingUser = await PendingUser.findOne({ email: cleanedEmail });
+
+    if (pendingUser) {
+      // Check OTP expiration
+      if (pendingUser.otpExpiresAt < new Date()) {
+        await PendingUser.findByIdAndDelete(pendingUser._id);
+        return res.status(400).json({
+          message: "OTP has expired. Please register again.",
+        });
+      }
+
+      // Check OTP match
+      if (pendingUser.otp !== cleanOtp) {
+        return res.status(400).json({ message: "Invalid OTP" });
+      }
+
+      // Check existing user conflict in main collection
+      const existingUser = await userModel.findOne({
+        $or: [
+          { email: pendingUser.email },
+          { userName: pendingUser.userName },
+        ],
+      });
+
+      if (existingUser) {
+        await PendingUser.findByIdAndDelete(pendingUser._id);
+        return res.status(400).json({
+          message: "User with this email or username already exists.",
+        });
+      }
+
+      // Create actual user document in users collection
+      const user = await userModel.create({
+        userName: pendingUser.userName,
+        email: pendingUser.email,
+        password: pendingUser.password, // already hashed
+        collageName: pendingUser.collageName,
+        department: pendingUser.department,
+        semester: pendingUser.semester,
+        phone: pendingUser.phone,
+        avatar: pendingUser.avatar,
+        role: pendingUser.role,
+        isVerified: true,
+      });
+
+      // Remove pending signup session
+      await PendingUser.findByIdAndDelete(pendingUser._id);
+
+      return res.status(201).json({
+        message: "Email verified and account created successfully",
+        userverified: true,
+        user: {
+          _id: user._id,
+          id: user._id,
+          userName: user.userName,
+          username: user.userName,
+          email: user.email,
+          collageName: user.collageName,
+          department: user.department,
+          semester: user.semester,
+          phone: user.phone,
+          avatar: user.avatar,
+          role: user.role,
+          isVerified: user.isVerified,
+        },
+      });
+    }
+
+    // 2. Fallback: check otpModel for existing user verification
+    const otpHash = crypto.createHash("sha256").update(cleanOtp).digest("hex");
     const otpDetail = await otpModel.findOne({
       email: cleanedEmail,
       otpHash,
     });
-    if (!otpDetail) return res.status(400).json({ message: "Invalid OTP" });
+
+    if (!otpDetail) {
+      return res.status(400).json({ message: "Invalid OTP or session expired" });
+    }
 
     const otpAge = Date.now() - otpDetail.createdAt.getTime();
-
     if (otpAge > 5 * 60 * 1000) {
       await otpModel.deleteMany({ email: cleanedEmail });
       return res.status(400).json({
@@ -434,9 +547,7 @@ export async function verifyEmail(req, res) {
       { new: true }
     );
 
-    await otpModel.deleteMany({
-      user: otpDetail.user,
-    });
+    await otpModel.deleteMany({ email: cleanedEmail });
 
     return res.status(200).json({
       message: "Email verified successfully",
@@ -447,6 +558,8 @@ export async function verifyEmail(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export const verifyOTP = verifyEmail;
 
 export async function getMe(req, res) {
   const curretLoggedInUser = await userModel.findById(req.user.id);
